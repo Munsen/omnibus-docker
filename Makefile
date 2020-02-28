@@ -1,10 +1,23 @@
-all: ubuntu-16.04 centos-6 centos-7
+OS_VERSION ?= 7
+EPEL_VERSION ?= $(OS_VERSION)
+CHEF_VERSION ?= 12.22.5
+CHEF_SPECIAL ?= 1
+ARCH ?= x86_64
 
-ubuntu-16.04: ./ubuntu/16.04
-	docker build $^ -t 'omnibus-ubuntu:16.04'
+.PHONY: centos ubuntu
 
-centos-6: ./centos/6
-	docker build $^ -t 'omnibus-centos:6'
+centos: centos/Dockerfile
+	docker build $(shell dirname $^) -t 'omnibus-centos:$(OS_VERSION)-$(CHEF_VERSION)' \
+	  --build-arg os_version=$(OS_VERSION) \
+		--build-arg epel_version=$(EPEL_VERSION) \
+		--build-arg chef_version=$(CHEF_VERSION) \
+		--build-arg chef_special=${CHEF_SPECIAL} \
+		--build-arg arch=$(ARCH)
 
-centos-7: ./centos/7
-	docker build $^ -t 'omnibus-centos:7'
+ubuntu: ubuntu/Dockerfile
+	docker build $(shell dirname $^) -t 'omnibus-ubuntu:$(OS_VERSION)-$(CHEF_VERSION)' \
+	  --build-arg os_version=$(OS_VERSION) \
+		--build-arg epel_version=$(EPEL_VERSION) \
+		--build-arg chef_version=$(CHEF_VERSION) \
+		--build-arg chef_special=${CHEF_SPECIAL} \
+		--build-arg arch=$(ARCH)
